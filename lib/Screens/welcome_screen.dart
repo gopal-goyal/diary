@@ -1,16 +1,23 @@
+import 'package:firebase_core/firebase_core.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:font_awesome_flutter/font_awesome_flutter.dart';
+import 'package:diary/Screens/home_page.dart';
+import 'package:firebase_auth/firebase_auth.dart';
 
 class WelcomeScreen extends StatefulWidget {
   const WelcomeScreen({Key key}) : super(key: key);
-
   @override
   _WelcomeScreenState createState() => _WelcomeScreenState();
 }
 
 class _WelcomeScreenState extends State<WelcomeScreen> {
+  final _auth = FirebaseAuth.instance;
+  String password;
+  String email;
+
   @override
+
   Widget build(BuildContext context) {
     return Scaffold(
       backgroundColor: Color(0xFFFDF1D5),
@@ -33,8 +40,21 @@ class _WelcomeScreenState extends State<WelcomeScreen> {
                     color: Colors.white,
                     borderRadius: BorderRadius.circular(30.0),
                     child: MaterialButton(
-                      onPressed: () {
-                        //Go to login screen.
+                      onPressed: () async {
+                        try {
+                          final newUser =
+                              await _auth.createUserWithEmailAndPassword(
+                                  email: email, password: password);
+                          if (newUser != null) {
+                            Navigator.of(context).pop();
+                            Navigator.push(
+                                context,
+                                MaterialPageRoute(
+                                    builder: (context) => HomePage()));
+                          }
+                        } catch (e) {
+                          print(e);
+                        }
                       },
                       minWidth: 100.0,
                       height: 42.0,
@@ -78,6 +98,10 @@ class _WelcomeScreenState extends State<WelcomeScreen> {
             Container(
               padding: EdgeInsets.symmetric(horizontal: 60.0),
               child: TextField(
+                keyboardType: TextInputType.emailAddress,
+                onChanged: (value) {
+                  email = value;
+                },
                 decoration: InputDecoration(
                   hintText: 'Username',
                   hintStyle: TextStyle(
@@ -90,6 +114,10 @@ class _WelcomeScreenState extends State<WelcomeScreen> {
             Container(
               padding: EdgeInsets.symmetric(horizontal: 60.0),
               child: TextField(
+                obscureText: true,
+                onChanged: (value) {
+                  password = value;
+                },
                 decoration: InputDecoration(
                   hintText: 'Password',
                   hintStyle: TextStyle(
